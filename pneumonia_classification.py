@@ -29,16 +29,17 @@ def load_images(subset):
     pos_images = []
     neg_images = []     
     
-    # Iterate through file lists and generate data.
+    # Iterate through file lists and generate data arrays.
     for pos_sample in pos_files:                    
         image = cv.resize(cv.imread(path_dict[subset]['pneumonia'] + pos_sample, cv.IMREAD_GRAYSCALE), (150, 150))
         pos_images.append(image)
-    labels = [1] * len(pos_images)
+    labels = [1] * len(pos_images) # Pneumonia
     
     for neg_sample in neg_files:
         image = cv.resize(cv.imread(path_dict[subset]['normal'] + neg_sample, cv.IMREAD_GRAYSCALE), (150, 150))
         neg_images.append(image)
-    labels += [0] * len(neg_images)
+    labels += [0] * len(neg_images) # Healthy
+    
     # Convert images to numpy array
     images = np.concatenate((pos_images, neg_images))
     del pos_images  # For low memory machines
@@ -50,7 +51,6 @@ def main():
     
     X_train, y_train = load_images(subset='train')
     X_test, y_test = load_images(subset='test')
-    # X_val, y_val = load_images(subset='validation')
 
     # Let's try an SVM directly on the images themselves
     print('Training SVM classifier...')
@@ -70,13 +70,15 @@ def main():
     disp.ax_.set_title('Confusion matrix (SVM)')
     plt.show()
     
-    # Load training and validation data into efficient tf datasets. Resize each image to 150x150 as in the SVM case 
+    # CNN part
+    # Load training and validation data into efficient tf.data datasets. Resize each image to 150x150 as in the SVM case 
     batch_size = 32
     img_height = 150
     img_width = 150
     epochs = 16
+    
     train_ds = tf.keras.preprocessing.image_dataset_from_directory(
-        directory = 'drive/MyDrive/Datasets/chest_xray/train',
+        directory = 'chest_xray/train',
         validation_split = 0.2,
         subset='training',
         seed=123,
@@ -86,7 +88,7 @@ def main():
         batch_size = batch_size)
     
     val_ds = tf.keras.preprocessing.image_dataset_from_directory(
-        directory ='drive/MyDrive/Datasets/chest_xray/train',       
+        directory ='chest_xray/train',       
         subset='validation',
         validation_split=0.2,
         seed=123,
