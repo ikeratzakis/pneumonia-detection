@@ -96,7 +96,8 @@ def main():
         label_mode = 'binary',     
         image_size = (img_height, img_width),
         batch_size = batch_size)
-        
+    
+    # Improve I/O performance via tf autotune
     AUTOTUNE = tf.data.AUTOTUNE
     train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
     val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
